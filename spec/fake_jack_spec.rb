@@ -88,6 +88,26 @@ RSpec.describe FakeJack do
     )
   end
 
+  it 'scenario 5' do
+    deck = build_deck(12, 10, 8, 13, 14, 6, 8, 11)
+    input_stream.puts('stand')
+    input_stream.rewind
+
+    game = described_class.new(input_stream: input_stream, output_stream: output_stream, deck: deck)
+    game.play
+
+    expect(output_stream.string).to eq(
+      <<~GAME
+        Dealer: 12 10
+        Dealer: 8 13
+        Dealer: 14 6
+        Dealer: 8 11
+        Player: stand
+        Dealer  Wins!
+      GAME
+    )
+  end
+
   def build_deck(*cards)
     deck = double(:deck)
     allow(deck).to receive(:next_card).and_return(

@@ -1,68 +1,72 @@
 class FakeJack
+  DEALER_MUST_HIT = 17
+  INITIAL_CARDS_UPPER_LIMIT = 20
+
   def initialize(input_stream: STDIN, output_stream: STDOUT, deck: nil)
     @input_stream = input_stream
-    @game = Game.new(output_stream: output_stream, deck: deck)
+    @output_stream = output_stream
+    @deck = deck
+    @running = true
+
+    @player_hand = Hand.new(initial_cards)
+    @dealer_hand = Hand.new(initial_cards)
   end
 
   def play
-    while @game.running?
+    while running? do
+      @output_stream.puts("Player: ")
       command = @input_stream.readline.chomp
-      @game.perform(command)
+      perform(command)
+    end
+    finalize
+  end
+
+  private
+
+  def perform(command)
+    perform_hit if command == 'hit'
+    perform_stand if command == 'stand'
+  end
+
+  def perform_hit
+    card = @deck.next_card
+    @player_hand.deal_card(card)
+    @output_stream.puts("Dealer: #{card}")
+    @running = !@player_hand.busted?
+  end
+
+  def perform_stand
+    dealer_hand = []
+    while @dealer_hand.score < DEALER_MUST_HIT
+      card = @deck.next_card
+      dealer_hand << card.to_s
+      @dealer_hand.deal_card(card)
+    end
+    @output_stream.puts("Dealer: #{dealer_hand.join(' ')}") if dealer_hand.any?
+    @running = false
+  end
+
+  def finalize
+    if @player_hand.busted? || (!@dealer_hand.busted? && @dealer_hand.score >= @player_hand.score)
+      @output_stream.puts("Dealer  Wins!")
+    else
+      @output_stream.puts("Player  Wins!")
     end
   end
 
-  class Game
-    DEALER_MUST_HIT = 17
-    INITIAL_CARDS_UPPER_LIMIT = 20
+  def running?
+    @running
+  end
 
-    def initialize(output_stream:, deck:)
-      @output_stream = output_stream
-      @deck = deck
+  def initial_cards
+    @initial_hand ||= begin
       while true do
-        shared_cards = [@deck.next_card, @deck.next_card]
-        @output_stream.puts("Dealer: #{shared_cards[0]} #{shared_cards[1]}")
-        break if shared_cards.map(&:value).inject(:+) < INITIAL_CARDS_UPPER_LIMIT
+        card1 = @deck.next_card
+        card2 = @deck.next_card
+        @output_stream.puts("Dealer: #{card1} #{card2}")
+        break if (card1.value + card2.value) < INITIAL_CARDS_UPPER_LIMIT
       end
-      @player_hand = Hand.new(shared_cards)
-      @dealer_cards = Hand.new(shared_cards)
-      @running = true
-    end
-
-    def perform(command)
-      @output_stream.puts("Player: #{command}")
-      if command == 'hit'
-        card = @deck.next_card
-        @player_hand.add_card(card)
-        @output_stream.puts("Dealer: #{card}")
-        if @player_hand.busted?
-          @running = false
-          @output_stream.puts("Dealer  Wins!")
-        end
-      elsif command == 'stand'
-        @running = false
-        dealer_cards = []
-        while @dealer_cards.score < DEALER_MUST_HIT
-          card = @deck.next_card
-          dealer_cards << card
-          @dealer_cards.add_card(card)
-        end
-        @output_stream.puts("Dealer: #{dealer_cards.map(&:to_s).join(' ')}") if dealer_cards.any?
-        if @dealer_cards.busted? || @dealer_cards.score < @player_hand.score
-          @output_stream.puts("Player  Wins!")
-        else
-          @output_stream.puts("Dealer  Wins!")
-        end
-      end
-    end
-
-    def running?
-      @running
-    end
-
-    private
-
-    def dealer(msg)
-      @output_stream.puts("Dealer: #{msg}")
+      [card1, card2]
     end
   end
 
@@ -73,7 +77,7 @@ class FakeJack
       @hand = hand.dup
     end
 
-    def add_card(card)
+    def deal_card(card)
       @hand << card
     end
 

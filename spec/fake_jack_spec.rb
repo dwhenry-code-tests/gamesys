@@ -5,19 +5,12 @@ RSpec.describe FakeJack do
   let(:output_stream) { StringIO.new }
 
   it 'scenario 1 - dealer wins' do
-    deck = double(:deck)
-    allow(deck).to receive(:next_card).and_return(
-      FakeJack::Card.new(suit: '', type: '2', value: 2),
-      FakeJack::Card.new(suit: '', type: 'A', value: 11),
-      FakeJack::Card.new(suit: '', type: '4', value: 4),
-      FakeJack::Card.new(suit: '', type: '7', value: 7),
-    )
-
-    game = described_class.new(input_stream: input_stream, output_stream: output_stream, deck: deck)
-
+    deck = build_deck(2, 11, 4, 7)
     input_stream.puts('hit')
     input_stream.puts('hit')
     input_stream.rewind
+
+    game = described_class.new(input_stream: input_stream, output_stream: output_stream, deck: deck)
     game.play
 
     expect(output_stream.string).to eq(
@@ -33,19 +26,12 @@ RSpec.describe FakeJack do
   end
 
   it 'scenario 2' do
-    deck = double(:deck)
-    allow(deck).to receive(:next_card).and_return(
-      FakeJack::Card.new(suit: '', type: '5', value: 5),
-      FakeJack::Card.new(suit: '', type: '9', value: 9),
-      FakeJack::Card.new(suit: '', type: '6', value: 6),
-      FakeJack::Card.new(suit: '', type: '2', value: 2),
-      FakeJack::Card.new(suit: '', type: '9', value: 9),
-    )
-    game = described_class.new(input_stream: input_stream, output_stream: output_stream, deck: deck)
-
+    deck = build_deck(5, 9, 6, 2, 9)
     input_stream.puts('hit')
     input_stream.puts('stand')
     input_stream.rewind
+
+    game = described_class.new(input_stream: input_stream, output_stream: output_stream, deck: deck)
     game.play
 
     expect(output_stream.string).to eq(
@@ -61,18 +47,12 @@ RSpec.describe FakeJack do
   end
 
   it 'scenario 3' do
-        deck = double(:deck)
-    allow(deck).to receive(:next_card).and_return(
-      FakeJack::Card.new(suit: '', type: '3', value: 3  ),
-      FakeJack::Card.new(suit: '', type: 'J', value: 12),
-      FakeJack::Card.new(suit: '', type: '4', value: 4),
-      FakeJack::Card.new(suit: '', type: '6', value: 6),
-    )
-    game = described_class.new(input_stream: input_stream, output_stream: output_stream, deck: deck)
-
+    deck = build_deck(3, 12, 4, 6)
     input_stream.puts('hit')
     input_stream.puts('stand')
     input_stream.rewind
+
+    game = described_class.new(input_stream: input_stream, output_stream: output_stream, deck: deck)
     game.play
 
     expect(output_stream.string).to eq(
@@ -85,5 +65,13 @@ RSpec.describe FakeJack do
         Dealer  Wins!
       GAME
     )
+  end
+
+  def build_deck(*cards)
+    deck = double(:deck)
+    allow(deck).to receive(:next_card).and_return(
+      *(cards.map { |value| FakeJack::Card.new(suit: 'hearts', type: value, value: value  ) })
+    )
+    deck
   end
 end

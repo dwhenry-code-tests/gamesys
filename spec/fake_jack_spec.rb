@@ -76,7 +76,7 @@ RSpec.describe FakeJack do
   def build_deck(*cards)
     deck = double(:deck)
     allow(deck).to receive(:next_card).and_return(
-      *(cards.map { |value| FakeJack::Card.new(suit: 'hearts', type: value, value: value  ) })
+      *(cards.map { |value| FakeJack::Card.new(value: value  ) })
     )
     deck
   end

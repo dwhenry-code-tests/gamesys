@@ -11,21 +11,21 @@ class FakeJack
   end
 
   def play
-    @player_hand = Hand.build(deck: @deck, output_stream: @output_stream)
+    @player_hand = Hand.build_valid_hand(deck: @deck, output_stream: @output_stream)
     @dealer_hand = @player_hand.dup
     @running = true
 
-    while running? do
-      @output_stream.puts("Player: ")
-      command = @input_stream.readline.chomp
-      perform(command)
-    end
+    process_next_command while running?
+
     report_winner
   end
 
   private
 
-  def perform(command)
+  def process_next_command
+    @output_stream.puts("Player: ")
+    command = @input_stream.readline.chomp
+
     if command == 'hit'
       @player_hand.hit
       @running = !@player_hand.busted?

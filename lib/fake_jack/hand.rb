@@ -4,37 +4,31 @@ class FakeJack
     INITIAL_CARDS_UPPER_LIMIT = 20
     AUTO_HIT_LIMIT = 17
 
-    def self.build(deck:, output_stream:)
-      hand = new(deck: deck, output_stream: output_stream)
-      hand.build
+    def self.build_valid_hand(deck:, output_stream:)
+      cards = [deck.next_card, deck.next_card]
+      output_stream.puts("Dealer: #{cards[0]} #{cards[1]}")
+      hand = new(deck: deck, output_stream: output_stream, cards: cards)
+
       if hand.valid_starting_hand?
         hand
       else
-        build(deck: deck, output_stream: output_stream)
+        build_valid_hand(deck: deck, output_stream: output_stream)
       end
     end
 
-    def initialize(deck:, output_stream:)
+    def initialize(deck:, output_stream:, cards:)
       @deck = deck
       @output_stream = output_stream
-    end
-
-    def build
-      @hand = [@deck.next_card, @deck.next_card]
-      @output_stream.puts("Dealer: #{values.join(' ')}")
-    end
-
-    def set(hand)
-      @hand = hand
+      @cards = cards
     end
 
     def hit
-      @hand << @deck.next_card
-      @output_stream.puts("Dealer: #{@hand[-1]}")
+      @cards << @deck.next_card
+      @output_stream.puts("Dealer: #{@cards[-1]}")
     end
 
     def auto_hit
-      @hand << @deck.next_card while score < AUTO_HIT_LIMIT
+      @cards << @deck.next_card while score < AUTO_HIT_LIMIT
       new_cards = values[2..-1]
       @output_stream.puts("Dealer: #{new_cards.join(' ')}") if new_cards.any?
     end
@@ -48,23 +42,19 @@ class FakeJack
     end
 
     def dup
-      Hand.new(deck: @deck, output_stream: @output_stream).tap do |hand|
-        hand.set(@hand.dup)
-      end
+      Hand.new(deck: @deck, output_stream: @output_stream, cards: @cards.dup)
     end
 
-    def beats?(hand)
-      !busted? && (hand.busted? || hand.score < score)
+    def beats?(dealer_hand)
+      !busted? && (dealer_hand.busted? || dealer_hand.score < score)
     end
 
     def score
       values.inject(:+)
     end
 
-    private
-
     def values
-      @hand.map(&:value)
+      @cards.map(&:value)
     end
   end
 end

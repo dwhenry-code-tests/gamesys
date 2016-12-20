@@ -34,10 +34,10 @@ class FakeJack
   end
 
   def report_winner
-    if @player_hand.busted? || (!@dealer_hand.busted? && @dealer_hand.score >= @player_hand.score)
-      @output_stream.puts("Dealer  Wins!")
-    else
+    if @player_hand.beats?(@dealer_hand)
       @output_stream.puts("Player  Wins!")
+    else
+      @output_stream.puts("Dealer  Wins!")
     end
   end
 
@@ -52,6 +52,7 @@ class FakeJack
 
     def self.build(deck:, output_stream:)
       hand = new(deck: deck, output_stream: output_stream)
+      hand.build
       if hand.valid_starting_hand?
         hand
       else
@@ -59,19 +60,18 @@ class FakeJack
       end
     end
 
-    def initialize(deck:, output_stream:, hand: nil)
+    def initialize(deck:, output_stream:)
       @deck = deck
       @output_stream = output_stream
-      if hand
-        @hand = hand
-      else
-        @hand = [@deck.next_card, @deck.next_card]
-        @output_stream.puts("Dealer: #{values.join(' ')}")
-      end
     end
 
-    def deal_card(card)
-      @hand << card
+    def build
+      @hand = [@deck.next_card, @deck.next_card]
+      @output_stream.puts("Dealer: #{values.join(' ')}")
+    end
+
+    def set(hand)
+      @hand = hand
     end
 
     def hit
@@ -81,7 +81,8 @@ class FakeJack
 
     def auto_hit
       @hand << @deck.next_card while score < AUTO_HIT_LIMIT
-      @output_stream.puts("Dealer: #{values[2..-1].join(' ')}") if @hand.size > 2
+      new_cards = values[2..-1]
+      @output_stream.puts("Dealer: #{new_cards.join(' ')}") if new_cards.any?
     end
 
     def busted?
@@ -89,19 +90,27 @@ class FakeJack
     end
 
     def valid_starting_hand?
-      (@hand[0].value + @hand[1].value) < INITIAL_CARDS_UPPER_LIMIT
+      score < INITIAL_CARDS_UPPER_LIMIT
+    end
+
+    def dup
+      Hand.new(deck: @deck, output_stream: @output_stream).tap do |hand|
+        hand.set(@hand.dup)
+      end
+    end
+
+    def beats?(hand)
+      !busted? && (hand.busted? || hand.score < score)
     end
 
     def score
       values.inject(:+)
     end
 
+    private
+
     def values
       @hand.map(&:value)
-    end
-
-    def dup
-      Hand.new(deck: @deck, output_stream: @output_stream, hand: @hand.dup)
     end
   end
 

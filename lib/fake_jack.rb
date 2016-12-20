@@ -12,13 +12,14 @@ class FakeJack
   end
 
   class Game
+    DEALER_MUST_HIT = 17
     def initialize(output_stream:, deck:)
       @output_stream = output_stream
       @deck = deck
       shared_cards = [@deck.next_card, @deck.next_card]
       @output_stream.puts("Dealer: #{shared_cards[0]} #{shared_cards[1]}")
       @player_hand = Hand.new(shared_cards)
-      @dealer = Hand.new(shared_cards)
+      @dealer_cards = Hand.new(shared_cards)
       @running = true
     end
 
@@ -33,9 +34,17 @@ class FakeJack
           @output_stream.puts("Dealer  Wins!")
         end
       elsif command == 'stand'
-
-      else
-        @output_stream.puts("Dealer: Invalid command")
+        @running = false
+        dealer_cards = []
+        while @dealer_cards.score < DEALER_MUST_HIT
+          card = @deck.next_card
+          dealer_cards << card
+          @dealer_cards.add_card(card)
+        end
+        @output_stream.puts("Dealer: #{dealer_cards.map(&:to_s).join(' ')}")
+        if @dealer_cards.busted?
+          @output_stream.puts("Player  Wins!")
+        end
       end
     end
 
@@ -66,7 +75,6 @@ class FakeJack
     end
 
     def score
-      puts @hand.inspect
       @hand.map(&:value).inject(:+)
     end
   end

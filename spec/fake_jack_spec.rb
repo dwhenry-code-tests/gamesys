@@ -59,4 +59,31 @@ RSpec.describe FakeJack do
       GAME
     )
   end
+
+  it 'scenario 3' do
+        deck = double(:deck)
+    allow(deck).to receive(:next_card).and_return(
+      FakeJack::Card.new(suit: '', type: '3', value: 3  ),
+      FakeJack::Card.new(suit: '', type: 'J', value: 12),
+      FakeJack::Card.new(suit: '', type: '4', value: 4),
+      FakeJack::Card.new(suit: '', type: '6', value: 6),
+    )
+    game = described_class.new(input_stream: input_stream, output_stream: output_stream, deck: deck)
+
+    input_stream.puts('hit')
+    input_stream.puts('stand')
+    input_stream.rewind
+    game.play
+
+    expect(output_stream.string).to eq(
+      <<~GAME
+        Dealer: 3 12
+        Player: hit
+        Dealer: 4
+        Player: stand
+        Dealer: 6
+        Dealer  Wins!
+      GAME
+    )
+  end
 end

@@ -42,8 +42,10 @@ class FakeJack
           @dealer_cards.add_card(card)
         end
         @output_stream.puts("Dealer: #{dealer_cards.map(&:to_s).join(' ')}")
-        if @dealer_cards.busted?
+        if @dealer_cards.busted? || @dealer_cards.score < @player_hand.score
           @output_stream.puts("Player  Wins!")
+        else
+          @output_stream.puts("Dealer  Wins!")
         end
       end
     end

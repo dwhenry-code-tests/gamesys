@@ -3,7 +3,7 @@ require 'fake_jack/deck'
 require 'fake_jack/hand'
 
 class FakeJack
-  def initialize(input_stream: STDIN, output_stream: STDOUT, deck: nil)
+  def initialize(input_stream: STDIN, output_stream: STDOUT, deck: FakeJack::Deck.new)
     @input_stream = input_stream
     @output_stream = output_stream
     @deck = deck
@@ -23,7 +23,7 @@ class FakeJack
   private
 
   def process_next_command
-    @output_stream.puts("Player: ")
+    @output_stream.print("Player: ")
     command = @input_stream.readline.chomp
 
     if command == 'hit'

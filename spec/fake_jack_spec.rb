@@ -14,7 +14,7 @@ RSpec.describe FakeJack do
     game.play
 
     expect(output_stream.string).to eq(
-      "Dealer: 2 11\nPlayer: \nDealer: 4\nPlayer: \nDealer: 7\nDealer  Wins!\n"
+      "Dealer: 2 11\nPlayer: Dealer: 4\nPlayer: Dealer: 7\nDealer  Wins!\n"
     )
   end
 
@@ -28,7 +28,7 @@ RSpec.describe FakeJack do
     game.play
 
     expect(output_stream.string).to eq(
-      "Dealer: 5 9\nPlayer: \nDealer: 6\nPlayer: \nDealer: 2 9\nPlayer  Wins!\n"
+      "Dealer: 5 9\nPlayer: Dealer: 6\nPlayer: Dealer: 2 9\nPlayer  Wins!\n"
     )
   end
 
@@ -42,7 +42,7 @@ RSpec.describe FakeJack do
     game.play
 
     expect(output_stream.string).to eq(
-      "Dealer: 3 12\nPlayer: \nDealer: 4\nPlayer: \nDealer: 6\nDealer  Wins!\n"
+      "Dealer: 3 12\nPlayer: Dealer: 4\nPlayer: Dealer: 6\nDealer  Wins!\n"
     )
   end
 
@@ -56,7 +56,7 @@ RSpec.describe FakeJack do
     game.play
 
     expect(output_stream.string).to eq(
-      "Dealer: 6 3\nPlayer: \nDealer: 11\nPlayer: \nDealer: 6 4\nPlayer  Wins!\n"
+      "Dealer: 6 3\nPlayer: Dealer: 11\nPlayer: Dealer: 6 4\nPlayer  Wins!\n"
     )
   end
 
@@ -69,7 +69,7 @@ RSpec.describe FakeJack do
     game.play
 
     expect(output_stream.string).to eq(
-      "Dealer: 12 10\nDealer: 8 13\nDealer: 14 6\nDealer: 8 11\nPlayer: \nDealer  Wins!\n"
+      "Dealer: 12 10\nDealer: 8 13\nDealer: 14 6\nDealer: 8 11\nPlayer: Dealer  Wins!\n"
     )
   end
 
